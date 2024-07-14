@@ -1,0 +1,36 @@
+// backend/trollHunter.jsw
+import { insert } from 'wix-data';
+
+function _generateRandomKey() {
+    const randomSegment = () => {
+        const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // A-Z
+        const randomDigits = Math.floor(1000 + Math.random() * 9000).toString().substring(1); // 3 random digits
+        return `${randomLetter}${randomDigits}`;
+    };
+    return `${randomSegment()}-${randomSegment()}-${randomSegment()}`;
+}
+
+async function _storeTrollHuntData(url, comments, referenceKey) {
+    const toInsert = {
+        url: url,
+        comments: comments,
+        referenceKey: referenceKey
+    };
+    
+    try {
+        await insert('TrollHuntData', toInsert);
+    } catch (error) {
+        throw new Error('Database insertion failed');
+    }
+}
+
+export async function storeTrollHunt(url, comments) {
+  try {
+    const referenceKey = _generateRandomKey();
+    await _storeTrollHuntData(url, JSON.stringify(comments), referenceKey);
+    url ="https://www.powerofmoo.com/trollhunter?key=" + referenceKey;
+    return { url };
+  } catch (error) {
+      return { error: 'Failed to store data' };
+  }
+}
